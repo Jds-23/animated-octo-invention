@@ -1,13 +1,14 @@
-# Bounty Hunter Contract
+# Bounty Hunter Contract with Rewards Integrated
 
-This is very first iteration of bounty hunter, running base test successfuly. Tobe tested with more edge cases.
-I will be moving to integrate escrow integration
+This is second iteration of bounty hunter with reward distribution, running base test successfuly. Tobe tested with more edge cases.
+I will be moving to deploy in polygon mumbai for ui integration.
 
 ### To do
 
 ```
 Test by creating dummy ipfs files
-Is there a Better way to store winners?
+Dynamic erc20 tokens & ether payments
+Add emergence withdraw
 Testing with more edge cases
 ```
 
