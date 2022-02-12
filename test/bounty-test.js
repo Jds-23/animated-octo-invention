@@ -7,12 +7,25 @@ describe("BountyMaker", function () {
   let bountymaker;
   let accounts;
   let onwer;
+  let USDC;
+  let usdc;
   beforeEach(async function () {
     // Get the contract instance
     [onwer, ...accounts] = await ethers.getSigners();
+    USDC = await ethers.getContractFactory("USDC");
+    usdc = await USDC.deploy();
+    await usdc.deployed();
+
     BountyMaker = await ethers.getContractFactory("BountyMaker");
-    bountymaker = await BountyMaker.deploy();
+    bountymaker = await BountyMaker.deploy(usdc.address);
     await bountymaker.deployed();
+
+    const tokenApproval = await usdc.approve(
+      bountymaker.address,
+      "100000000000000000000000000"
+    );
+    // wait until the transaction is mined
+    await tokenApproval.wait();
   });
 
   async function bountyCreator(
@@ -300,6 +313,36 @@ describe("BountyMaker", function () {
       .claimToken(bountyId1);
     await winnerClaim.wait();
     expect(await bountymaker.balanceOf(accounts[1].address)).to.equal(1);
+  });
+  it("Winner can claim there nft even without reward", async function () {
+    const bountyId1 = "VVS";
+    const uri1 = "ipfs://Qma9fyUqLUm3SmAdxBBS6g3qxu6xNWdrkZcuUGPNAnjv9E/";
+    const tokenLimit1 = 5;
+    const rewards1 = [300, 200, 100];
+
+    const createABountyTx = await bountyCreator(
+      bountyId1,
+      uri1,
+      tokenLimit1,
+      rewards1
+    );
+    await createABountyTx.wait();
+
+    const setWinnersTx = await bountymaker.setBountyWinners(bountyId1, [
+      accounts[1].address,
+      accounts[2].address,
+      accounts[3].address,
+      accounts[4].address,
+      accounts[5].address,
+    ]);
+
+    await setWinnersTx.wait();
+
+    const winnerClaim = await bountymaker
+      .connect(accounts[4])
+      .claimToken(bountyId1);
+    await winnerClaim.wait();
+    expect(await bountymaker.balanceOf(accounts[4].address)).to.equal(1);
   });
   it("Winner cannot claim once claimed there reward", async function () {
     const bountyId1 = "VVS";
